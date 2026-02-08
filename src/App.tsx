@@ -1,22 +1,32 @@
-import {useState} from 'react';
+import {useEffect, useState} from 'react';
 
-const tracks = [
-  {
-    id: 1,
-    title: "Musicfun soundtrack",
-    url: "https://musicfun.it-incubator.app/api/samurai-way-soundtrack.mp3",
-  },
-  {
-    id: 2,
-    title: "Musicfun soundtrack instrumental",
-    url: " https://musicfun.it-incubator.app/api/samurai-way-soundtrack-instrumental.mp3",
-  },
-]
 
+interface Track {
+  id: number
+  attributes: {
+    title: string
+    attachments: {
+      url: string
+    }[]
+  }
+}
 
 
 function App() {
   const [selectedTrackId, setSelectedTrackId] = useState<number | null>(null)
+  const [tracks, setTracks] = useState<Track[] | null>(null)
+  useEffect(() => {
+    console.log('effect')
+    fetch('https://musicfun.it-incubator.app/api/1.0/playlists/tracks', {
+      headers: {
+        'api-key': 'cfb5bfa9-69d4-4439-9be6-0e61787bc84d',
+      },
+    })
+      .then((res) => res.json())
+      .then((json) => {
+        setTracks(json.data)
+      })
+  }, [])
 
   if (tracks === null) {
     return (
@@ -39,17 +49,18 @@ function App() {
   return (
     <>
       <h1>Musicfun player</h1>
-      <button onClick={()=> setSelectedTrackId(null)}>Reset selection</button>
+      <button onClick={() => setSelectedTrackId(null)}>Reset selection</button>
       <ul>
         {tracks.map((track) => (
           <li
             key={track.id}
-            style={{ border: track.id === selectedTrackId ? "1px solid orange" : "none" }}>
+            style={{border: track.id === selectedTrackId ? '1px solid orange' : 'none'}}>
 
-            <div onClick={()=>{
-              setSelectedTrackId(track.id)}}>
-              {track.title}</div>
-            <audio controls src={track.url}></audio>
+            <div onClick={() => {
+              setSelectedTrackId(track.id)
+            }}>
+              {track.attributes.title}</div>
+            <audio controls src={track.attributes.attachments[0].url}></audio>
           </li>
         ))}
       </ul>
